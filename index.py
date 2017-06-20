@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-Compute the pixels size and remaining size of a page title or description for Google SERP according to source device (user agent).
-This tool is configured for a standard laptop device using Chrome web browser :
-user agent Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
+Compute the pixel width and remaining width of a page title or description for Google SERP according to source device (laptop, mobile,...).
+The goal of this tool is to optimize the writing of titles and descriptions of your web pages.
+
+The source device used in this tool is a laptop with Chrome web browser :
+user agent -> Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
+
+In this configuration, the maximum width of the title is 588 pixels, and 1250 pixels for the description.
 """
 
 __author__ = "Anthony Sigogne"
@@ -26,20 +30,20 @@ with open("config/pixel_config_chrome55_desktop.txt") as f :
         key, value = line.strip().rsplit("=",1)
         config[key] = int(value) if value.isdigit() else value
 
-@app.route("/size", methods=['POST'])
-def pixels_size():
+@app.route("/width", methods=['POST'])
+def pixels_width():
     """
-    URL : /size
-    Compute pixels size and remaining size of a title or description.
+    URL : /width
+    Compute pixels width and remaining width of a page title or description.
     Method : POST
     Form data :
         - text : your text
         - type : type of text ("title" or "description")
-    Return a JSON dictionary with two keys : {"size":XX, "remaining":YY}
+    Return a JSON dictionary with two keys : {"width":XX, "remaining":YY}
     """
     def remove_accents(input_str) :
         """
-        Accents are not used in pixel size computation.
+        Accents are not used in pixel width computation.
         """
         try :
             nfkd_form = unicodedata.normalize('NFKD', input_str)
@@ -51,17 +55,17 @@ def pixels_size():
     text = request.form.get("text", None)
     text_type = request.form.get("type", "title")
 
-    # compute pixels size and remaining
+    # compute pixels width and remaining width
     if not text :
-        result = {"size":0, "remaining":config[type_text+"MaxPixels"]}
+        result = {"width":0, "remaining":config[text_type+"MaxPixels"]}
     else :
-        size = sum([config.get(letter,config.get(letter,5)) for letter in remove_accents(text.strip()).decode("utf8")])
+        width = sum([config.get(letter,config.get(letter,5)) for letter in remove_accents(text.strip()).decode("utf8")])
         result = {
-            "size":size,
-            "remaining":config[text_type+"MaxPixels"] - size
+            "width":width,
+            "remaining":config[text_type+"MaxPixels"] - width
         }
 
-    # return the result (json dict) to request source
+    # return the result (json dict)
     return jsonify(result)
 
 @app.route("/")
@@ -71,7 +75,10 @@ def helper():
     Helper that list all methods of tool.
     Return a simple text.
     """
+    # print module docstring
     output = [__doc__.replace("\n","<br/>"),]
+
+    # then, get and print docstring of each rule
     for rule in app.url_map.iter_rules():
         if rule.endpoint == "static" : # skip static endpoint
             continue
@@ -80,4 +87,5 @@ def helper():
             options[arg] = "[{0}]".format(arg)
         methods = ','.join(rule.methods)
         output.append(app.view_functions[rule.endpoint].__doc__.replace("\n","<br/>"))
+
     return "<br/>".join(output)
