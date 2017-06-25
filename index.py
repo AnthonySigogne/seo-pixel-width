@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Compute the pixel width and remaining width of a page title or description for Google SERP according to source device (laptop, mobile,...).
-The goal of this tool is to optimize the writing of titles and descriptions of your web pages.
+API to compute the pixel width and remaining width of a page title or description for Google SERP according to source device (laptop, mobile,...).
+The goal of this tool is to optimize the writing of titles and descriptions of web pages.
 
 The source device used in this tool is a laptop with Chrome web browser :
 user agent -> Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
