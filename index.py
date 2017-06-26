@@ -30,16 +30,16 @@ with open("config/pixel_config_chrome55_desktop.txt") as f :
         key, value = line.strip().rsplit("=",1)
         config[key] = int(value) if value.isdigit() else value
 
-@app.route("/width", methods=['POST'])
+@app.route("/pixels", methods=['POST'])
 def pixels_width():
     """
-    URL : /width
+    URL : /pixels
     Compute pixels width and remaining width of a page title or description.
     Method : POST
     Form data :
         - text : your text
         - type : type of text ("title" or "description")
-    Return a JSON dictionary with two keys : {"width":XX, "remaining":YY}
+    Return a JSON dictionary : {"pixels":XX, "remaining":YY}
     """
     def remove_accents(input_str) :
         """
@@ -51,9 +51,15 @@ def pixels_width():
             return only_ascii
         except :
             return input_str
+
     # get POST data
-    text = request.form.get("text", None)
-    text_type = request.form.get("type", "title")
+    data = dict((key, request.form.get(key)) for key in request.form.keys())
+    if "text" not in data :
+        raise InvalidUsage('No text specified in POST data')
+    text = data.get("text", None)
+    text_type = data.get("type", "title")
+    if text_type not in ["title", "description"] :
+        raise InvalidUsage('Type of text must be "title" or "description"')
 
     # compute pixels width and remaining width
     if not text :
@@ -61,19 +67,18 @@ def pixels_width():
     else :
         width = sum([config.get(letter,config.get(letter,5)) for letter in remove_accents(text.strip()).decode("utf8")])
         result = {
-            "width":width,
+            "pixels":width,
             "remaining":config[text_type+"MaxPixels"] - width
         }
 
-    # return the result (json dict)
+    # return the result
     return jsonify(result)
 
 @app.route("/")
 def helper():
     """
     URL : /
-    Helper that list all methods of tool.
-    Return a simple text.
+    Helper that list all services of API.
     """
     # print module docstring
     output = [__doc__.replace("\n","<br/>"),]
@@ -89,3 +94,30 @@ def helper():
         output.append(app.view_functions[rule.endpoint].__doc__.replace("\n","<br/>"))
 
     return "<br/>".join(output)
+
+class InvalidUsage(Exception):
+    """
+    Custom invalid usage exception.
+    """
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    """
+    JSON version of invalid usage exception
+    """
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response

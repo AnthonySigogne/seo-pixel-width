@@ -8,6 +8,11 @@ user agent -> Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 
 In this configuration, the maximum width of the title is 588 pixels, and 1250 pixels for the description.
 
+## GOOGLE SERP
+Below, a sample of Google SERP. The title and description of the first result have been cut by Google, while the third result is perfect .
+
+![Google SERP](images/google.png?raw=true "Google SERP" )
+
 ## INSTALL
 ```
 pip install -r requirements.txt
@@ -19,10 +24,21 @@ To launch in debug mode :
 FLASK_APP=index.py FLASK_DEBUG=1 flask run
 ```
 
-## USAGE
-To list services of API, type this endpoint in your web browser : "http://localhost:5000/"
+To list all services of API, type this endpoint in your web browser : "http://localhost:5000/".
 
-## GOOGLE SERP
-Below, a sample of Google SERP. The title and description of the first result have been cut by Google, while the third result is perfect .
+## USAGE AND EXAMPLE
+The example below shows how to compute pixel width for a title with cURL :
+```
+curl http://localhost:5000/pixels --data-urlencode "text=Title Tag Pixel Width Checker - SEO Tool by Paul Shapiro" --data "type=title"
+```
 
-![Google SERP](images/google.png?raw=true "Google SERP" )
+The result is a JSON dictionary with pixel width and remaining pixels :
+```
+{
+  "pixels": 462,
+  "remaining": 126
+}
+```
+
+## NOTE
+This API works with Python2 and Python3.
