@@ -9,7 +9,7 @@ user agent -> Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 In this configuration, the maximum width of the title is 588 pixels, and 1250 pixels for the description.
 
 ## GOOGLE SERP
-Below, a sample of Google SERP. The title and description of the first result have been cut by Google, while the third result is perfect .
+Below, a sample of Google SERP. The title and description of the first result have been cut by Google because they are too long, while the third result is perfect.
 
 ![Google SERP](images/google.png?raw=true "Google SERP" )
 
