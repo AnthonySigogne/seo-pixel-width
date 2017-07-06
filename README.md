@@ -5,8 +5,10 @@ API - compute the pixels width and remaining width of a title and/or description
 
 The goal of this tool is to optimize the writing of titles and descriptions of web pages. If the title or description of your page is too long, Google will automatically cut it to a certain length and add "..." at the end. This decreases the chance that a visitor will visit your site.
 
-The source device used in this tool is a standard laptop with Chrome web browser :
-user agent -> Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
+The source device used in this tool is a standard laptop with Chrome web browser (user agent) :
+```
+Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
+```
 
 In this configuration, the maximum width of the title is 588 pixels, and 1250 pixels for the description.
 

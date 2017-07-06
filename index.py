@@ -2,11 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """
-API to compute the pixel width and remaining width of a page title or description for Google SERP according to source device (laptop, mobile,...).
-The goal of this tool is to optimize the writing of titles and descriptions of web pages.
+API - compute the pixels width and remaining width of a title and/or description of page for Google SERP.
 
-The source device used in this tool is a laptop with Chrome web browser :
-user agent -> Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
+The goal of this tool is to optimize the writing of titles and descriptions of web pages.
+If the title or description of your page is too long, Google will automatically cut it to a certain length and add "..." at the end.
+This decreases the chance that a visitor will visit your site.
+
+The source device used in this tool is a laptop with Chrome web browser (user agent) :
+Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
 
 In this configuration, the maximum width of the title is 588 pixels, and 1250 pixels for the description.
 """
@@ -33,7 +36,7 @@ with open("config/pixel_config_chrome55_desktop.txt") as f :
         config[key] = int(value) if value.isdigit() else value
 
 @app.route("/pixels", methods=['POST'])
-def pixels_width():
+def pixels_width_text():
     """
     URL : /pixels
     Compute pixels width and remaining width of a title or/and description.
@@ -51,21 +54,7 @@ def pixels_width():
     description = data.get("description", None)
 
     # compute pixels width and remaining width of title and description
-    result = {}
-
-    if title :
-        width = url.pixels(title, config)
-        result["title"] = {
-            "pixels":width,
-            "remaining":config["titleMaxPixels"] - width
-        }
-
-    if description :
-        width = url.pixels(description, config)
-        result["description"] = {
-            "pixels":width,
-            "remaining":config["descriptionMaxPixels"] - width
-        }
+    result = pixels_width(title, description)
 
     # return the result
     return jsonify(result)
@@ -91,21 +80,35 @@ def pixels_width_url():
     description = url.extract_description(url_data.text)
 
     # compute pixels width and remaining width of title and description
-    result = {}
-
-    if title :
-        width = url.pixels(title, config)
-        result["title"] = {
-            "pixels":width,
-            "remaining":config["titleMaxPixels"] - width
-        }
-
-    if description :
-        width = url.pixels(description, config)
-        result["description"] = {
-            "pixels":width,
-            "remaining":config["descriptionMaxPixels"] - width
-        }
+    result = pixels_width(title, description)
 
     # return the result
     return jsonify(result)
+
+def pixels_width(title, description) :
+    """
+    Compute pixels width and remaining width of a title or/and description.
+    """
+    result = {}
+
+    # compute title width
+    if title :
+        width = url.pixels(title, config)
+        result["title"] = {
+            "original_title":title,
+            "serp_title":title,
+            "width":width,
+            "remaining":config["titleMaxPixels"] - width
+        }
+
+    # compute description width
+    if description :
+        width = url.pixels(description, config)
+        result["description"] = {
+            "original_description":description,
+            "serp_description":description,
+            "width":width,
+            "remaining":config["descriptionMaxPixels"] - width
+        }
+
+    return result
