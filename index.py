@@ -17,13 +17,15 @@ __email__ = "anthony@byprog.com"
 __license__ = "MIT"
 __version__ = "1.0"
 
-# libraries of tool
-import unicodedata
-import urllib
-from flask import Flask, request, jsonify, url_for
-app = Flask(__name__)
+import url
+from flask import Flask, request, jsonify
 
-# read default user agent config : Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
+# init flask app and import helper
+app = Flask(__name__)
+with app.app_context():
+    from helper import *
+
+# read desktop user agent config : Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
 config = {}
 with open("config/pixel_config_chrome55_desktop.txt") as f :
     for line in f.readlines() :
@@ -34,90 +36,76 @@ with open("config/pixel_config_chrome55_desktop.txt") as f :
 def pixels_width():
     """
     URL : /pixels
-    Compute pixels width and remaining width of a page title or description.
+    Compute pixels width and remaining width of a title or/and description.
     Method : POST
     Form data :
-        - text : your text
-        - type : type of text ("title" or "description")
-    Return a JSON dictionary : {"pixels":XX, "remaining":YY}
+        - title : the title to analyze [string, required (if no description)]
+        - description : the description to analyze [string, required (if no title)]
+    Return width and remaining pixels for title and/or description.
     """
-    def remove_accents(input_str) :
-        """
-        Accents are not used in pixel width computation.
-        """
-        try :
-            nfkd_form = unicodedata.normalize('NFKD', input_str)
-            only_ascii = nfkd_form.encode('ASCII', 'ignore')
-            return only_ascii
-        except :
-            return input_str
-
     # get POST data
     data = dict((key, request.form.get(key)) for key in request.form.keys())
-    if "text" not in data :
-        raise InvalidUsage('No text specified in POST data')
-    text = data.get("text", None)
-    text_type = data.get("type", "title")
-    if text_type not in ["title", "description"] :
-        raise InvalidUsage('Type of text must be "title" or "description"')
+    if "title" not in data and "description" not in data :
+        raise InvalidUsage('No title and/or description in POST data')
+    title = data.get("title", None)
+    description = data.get("description", None)
 
-    # compute pixels width and remaining width
-    if not text :
-        result = {"width":0, "remaining":config[text_type+"MaxPixels"]}
-    else :
-        width = sum([config.get(letter,config.get(letter,5)) for letter in remove_accents(text.strip()).decode("utf8")])
-        result = {
+    # compute pixels width and remaining width of title and description
+    result = {}
+
+    if title :
+        width = url.pixels(title, config)
+        result["title"] = {
             "pixels":width,
-            "remaining":config[text_type+"MaxPixels"] - width
+            "remaining":config["titleMaxPixels"] - width
+        }
+
+    if description :
+        width = url.pixels(description, config)
+        result["description"] = {
+            "pixels":width,
+            "remaining":config["descriptionMaxPixels"] - width
         }
 
     # return the result
     return jsonify(result)
 
-@app.route("/")
-def helper():
+@app.route("/pixels_url", methods=['POST'])
+def pixels_width_url():
     """
-    URL : /
-    Helper that list all services of API.
+    URL : /pixels_url
+    Compute pixels width and remaining width of a page title and description.
+    Method : POST
+    Form data :
+        - url : the url to analyze [string, required]
+    Return width and remaining pixels for title and description.
     """
-    # print module docstring
-    output = [__doc__.replace("\n","<br/>"),]
+    # get POST data
+    data = dict((key, request.form.get(key)) for key in request.form.keys())
+    if "url" not in data :
+        raise InvalidUsage('No URL in POST data')
 
-    # then, get and print docstring of each rule
-    for rule in app.url_map.iter_rules():
-        if rule.endpoint == "static" : # skip static endpoint
-            continue
-        options = {}
-        for arg in rule.arguments:
-            options[arg] = "[{0}]".format(arg)
-        methods = ','.join(rule.methods)
-        output.append(app.view_functions[rule.endpoint].__doc__.replace("\n","<br/>"))
+    # get title and description in page
+    url_data = url.crawl(data.get("url"))
+    title = url.extract_title(url_data.text)
+    description = url.extract_description(url_data.text)
 
-    return "<br/>".join(output)
+    # compute pixels width and remaining width of title and description
+    result = {}
 
-class InvalidUsage(Exception):
-    """
-    Custom invalid usage exception.
-    """
-    status_code = 400
+    if title :
+        width = url.pixels(title, config)
+        result["title"] = {
+            "pixels":width,
+            "remaining":config["titleMaxPixels"] - width
+        }
 
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
+    if description :
+        width = url.pixels(description, config)
+        result["description"] = {
+            "pixels":width,
+            "remaining":config["descriptionMaxPixels"] - width
+        }
 
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
-@app.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    """
-    JSON version of invalid usage exception
-    """
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
+    # return the result
+    return jsonify(result)

@@ -1,4 +1,4 @@
-FROM python:alpine
+FROM python:3.5-alpine
 
 ENV FLASK_APP index.py
 
