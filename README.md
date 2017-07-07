@@ -1,5 +1,5 @@
 # seo-pixel-width
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Python 2.7](https://img.shields.io/badge/python-3.5-blue.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Python 3.5](https://img.shields.io/badge/python-3.5-blue.svg)
 
 API - compute the pixels width and remaining width of a title and/or description of page for Google SERP.
 
@@ -10,7 +10,13 @@ The source device used in this tool is a standard laptop with Chrome web browser
 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
 ```
 
-In this configuration, the maximum width of the title is 588 pixels, and 1250 pixels for the description.
+In this configuration, the maximum width of the title is 554 pixels, and 1204 pixels for the description.
+
+### UI
+This search engine can be used with an UI : https://github.com/AnthonySigogne/seo-pixel-width-ui
+
+## DEMO
+A demo can be found here : http://pixelwidth.byprog.com/  
 
 ## INSTALL AND RUN
 
@@ -76,12 +82,16 @@ Compute pixels width and remaining width of a title or/and description.
     ```
     {
       "description": {
-        "pixels": 646,
-        "remaining": 604
+        "original_description": "Full-Stack Developer specialized in new technologies and innovative IT solutions.",
+        "remaining": 558,
+        "serp_description": "Full-Stack Developer specialized in new technologies and innovative IT solutions.",
+        "width": 646
       },
       "title": {
-        "pixels": 413,
-        "remaining": 175
+        "original_title": "Anthony Sigogne / Freelance / Full-Stack Developer",
+        "remaining": 141,
+        "serp_title": "Anthony Sigogne / Freelance / Full-Stack Developer",
+        "width": 413
       }
     }
     ```
@@ -121,12 +131,16 @@ Compute pixels width and remaining width of a page title and description.
     ```
     {
       "description": {
-        "pixels": 1303,
-        "remaining": -53
+        "original_description": "Full-Stack Developer specialized in new technologies and innovative IT solutions.",
+        "remaining": 558,
+        "serp_description": "Full-Stack Developer specialized in new technologies and innovative IT solutions.",
+        "width": 646
       },
       "title": {
-        "pixels": 482,
-        "remaining": 106
+        "original_title": "Anthony Sigogne / Freelance / Full-Stack Developer",
+        "remaining": 141,
+        "serp_title": "Anthony Sigogne / Freelance / Full-Stack Developer",
+        "width": 413
       }
     }
     ```
@@ -139,7 +153,7 @@ Compute pixels width and remaining width of a page title and description.
 * **Sample Call (with cURL)**
 
   ```
-  curl -X POST -F "url=https://www.lemonde.fr" "http://localhost:5000/pixels_url"
+  curl -X POST -F "url=https://www.byprog.com/en" "http://localhost:5000/pixels_url"
   ```
 
 ## FUTURE FEATURES

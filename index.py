@@ -11,7 +11,7 @@ This decreases the chance that a visitor will visit your site.
 The source device used in this tool is a laptop with Chrome web browser (user agent) :
 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75 Safari/537.36
 
-In this configuration, the maximum width of the title is 588 pixels, and 1250 pixels for the description.
+In this configuration, the maximum width of the title is 554 pixels, and 1204 pixels for the description.
 """
 
 __author__ = "Anthony Sigogne"
@@ -92,23 +92,31 @@ def pixels_width(title, description) :
     result = {}
 
     # compute title width
-    if title :
-        width = url.pixels(title, config)
-        result["title"] = {
-            "original_title":title,
-            "serp_title":title,
-            "width":width,
-            "remaining":config["titleMaxPixels"] - width
-        }
+    width = url.pixels(title, config)
+    remaining = config["titleMaxPixels"] - width
+    if remaining >= 0 :
+        serp_title = title
+    else :
+        serp_title = url.cut_pixels_google(title, config["titleMaxPixels"], config)
+    result["title"] = {
+        "original_title":title,
+        "serp_title":serp_title,
+        "width":width,
+        "remaining":remaining
+    }
 
     # compute description width
-    if description :
-        width = url.pixels(description, config)
-        result["description"] = {
-            "original_description":description,
-            "serp_description":description,
-            "width":width,
-            "remaining":config["descriptionMaxPixels"] - width
-        }
+    width = url.pixels(description, config)
+    remaining = config["descriptionMaxPixels"] - width
+    if remaining >= 0 :
+        serp_description = description
+    else :
+        serp_description = url.cut_pixels_google(description, config["descriptionMaxPixels"], config)
+    result["description"] = {
+        "original_description":description,
+        "serp_description":serp_description,
+        "width":width,
+        "remaining":remaining
+    }
 
     return result

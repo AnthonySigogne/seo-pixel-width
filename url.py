@@ -65,3 +65,19 @@ def pixels(text, config) :
     Compute pixels width of title or description.
     """
     return sum([config.get(letter,config.get(letter,5)) for letter in remove_accents(text.strip()).decode("utf8")])
+
+def cut_pixels_google(text, max_pixels, config) :
+    """
+    Cut a text (title or description) to fit in pixel limits of Google serp.
+    """
+    cut_text = ""
+    pixel_counter = 0
+    for i, letter in enumerate(remove_accents(text.strip()).decode("utf8")) :
+        pixel_counter += config.get(letter,config.get(letter,5))
+        if pixel_counter > max_pixels :
+            if letter == ' ' :
+                return cut_text+"..."
+            else :
+                return cut_text.rsplit(' ',1)[0]+"..."
+        cut_text += text[i]
+    return cut_text
